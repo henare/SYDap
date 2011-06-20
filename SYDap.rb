@@ -4,11 +4,25 @@ require 'rubygems'
 require 'mechanize'
 require 'action_view'
 include ActionView::Helpers::DateHelper
+require 'twitter'
 
-@agent = Mechanize.new
+PATH_PREFIX = File.expand_path(File.dirname(__FILE__))
+config = YAML.parse(File.read(PATH_PREFIX + "/creds.yml"))
+
+%w{consumer_key consumer_secret access_token access_token_secret}.each do |key|
+  Object.const_set(key.upcase, config["config"][key].value)
+end
+
+Twitter.configure do |config|
+  config.consumer_key = CONSUMER_KEY
+  config.consumer_secret = CONSUMER_SECRET
+  config.oauth_token = ACCESS_TOKEN
+  config.oauth_token_secret = ACCESS_TOKEN_SECRET
+end
 
 def get_latest_flights(url, seconds_old, arrival)
-  page = @agent.get(url)
+  agent = Mechanize.new
+  page = agent.get(url)
 
   # Columns: Airline (image), Flight #, Destination, Scheduled, Estimated, Check-in desk, Status
   rows = page.at('table/tbody').search('tr')
@@ -53,5 +67,7 @@ latest_flights.each do |flight|
     tweet += ", #{distance_of_time_in_words(flight[:scheduled_time], flight[:estimated_time])}"
     tweet += flight[:estimated_time] > flight[:scheduled_time] ? " late" : " early"
   end
-  puts tweet
+  
+  # I don't think it should ever be larger than 140 characters
+  Twitter.update(tweet)
 end
