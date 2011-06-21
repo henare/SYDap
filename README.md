@@ -5,6 +5,11 @@ SYDap.rb is a bot that tweets the international arrivals and departures from Syd
 
 Inspired by and some code from https://github.com/infovore/tower-bridge
 
+Status
+------
+
+Half-baked. The Sydney Airport flight information pages aren't really suitable for this application so this is a failed experiment.
+
 Configuration
 -------------
 
